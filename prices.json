@@ -1,0 +1,107 @@
+{
+  "lastUpdated": "July 09, 2026",
+  "models": [
+    {
+      "name": "Claude Haiku 4.5",
+      "provider": "Anthropic",
+      "in": 1.0,
+      "out": 5.0
+    },
+    {
+      "name": "Claude Sonnet 5",
+      "provider": "Anthropic, intro thru Aug 31 '26",
+      "in": 2.0,
+      "out": 10.0
+    },
+    {
+      "name": "Claude Opus 4.8",
+      "provider": "Anthropic",
+      "in": 10.0,
+      "out": 50.0
+    },
+    {
+      "name": "Claude Fable 5",
+      "provider": "Anthropic",
+      "in": 10.0,
+      "out": 50.0
+    },
+    {
+      "name": "GPT-4.1 nano",
+      "provider": "OpenAI",
+      "in": 0.1,
+      "out": 0.4
+    },
+    {
+      "name": "GPT-4.1 mini",
+      "provider": "OpenAI",
+      "in": 0.4,
+      "out": 1.6
+    },
+    {
+      "name": "GPT-4o",
+      "provider": "OpenAI",
+      "in": 2.5,
+      "out": 10.0
+    },
+    {
+      "name": "GPT-5.4",
+      "provider": "OpenAI",
+      "in": 8.0,
+      "out": 15.0
+    },
+    {
+      "name": "GPT-5.5",
+      "provider": "OpenAI",
+      "in": 30.0,
+      "out": 180.0
+    },
+    {
+      "name": "Gemini 2.5 Flash-Lite",
+      "provider": "Google",
+      "in": 0.1,
+      "out": 0.4
+    },
+    {
+      "name": "Gemini 3.5 Flash",
+      "provider": "Google",
+      "in": 1.5,
+      "out": 9.0
+    },
+    {
+      "name": "Gemini 3.1 Pro",
+      "provider": "Google",
+      "in": 2.0,
+      "out": 12.0
+    },
+    {
+      "name": "Grok 4.20",
+      "provider": "xAI",
+      "in": 1.25,
+      "out": 2.5
+    },
+    {
+      "name": "Grok 4.3",
+      "provider": "xAI",
+      "in": 1.25,
+      "out": 2.5
+    },
+    {
+      "name": "DeepSeek V3.2",
+      "provider": "DeepSeek",
+      "in": 0.2288,
+      "out": 0.3432
+    },
+    {
+      "name": "Llama 3.3 70B",
+      "provider": "Meta, via Groq",
+      "in": 0.1,
+      "out": 0.32
+    },
+    {
+      "name": "Mistral Small",
+      "provider": "Mistral AI",
+      "in": 0.15,
+      "out": 0.6
+    }
+  ]
+}

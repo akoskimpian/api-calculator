@@ -1,0 +1,51 @@
+name: Update API Prices
+
+on:
+  schedule:
+    # Runs once a day at 06:00 UTC. GitHub may delay scheduled runs by
+    # a few minutes during high load, that's normal and not a bug.
+    - cron: '0 6 * * *'
+  workflow_dispatch:
+    # Adds a "Run workflow" button on the Actions tab for manual runs.
+
+permissions:
+  contents: write
+
+jobs:
+  update-prices:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install requests
+
+      - name: Run price updater
+        id: update
+        continue-on-error: true
+        run: python3 update_prices.py
+
+      - name: Commit and push prices.json if it changed
+        run: |
+          if ! git diff --quiet prices.json; then
+            git config user.name "price-bot"
+            git config user.email "actions@github.com"
+            git add prices.json
+            git commit -m "Update prices ($(date -u +'%Y-%m-%d'))"
+            git push
+          else
+            echo "No price changes today."
+          fi
+
+      - name: Fail the run if the updater reported warnings
+        if: steps.update.outcome == 'failure'
+        run: |
+          echo "update_prices.py exited with warnings. Some model(s) fell back to a stale price."
+          echo "Check the 'Run price updater' step above for details."
+          exit 1

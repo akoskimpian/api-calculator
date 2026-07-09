@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>API Cost Calculator: Compare LLM Token Pricing</title>
+<meta name="description" content="Estimate token counts and compare API costs across Claude, GPT and other LLM models, updated regularly.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#F3F5F9;
+    --surface:#FFFFFF;
+    --surface-2:#F8F9FC;
+    --border:#E4E7EE;
+    --text:#12141C;
+    --text-soft:#6B7280;
+    --text-faint:#9CA3AF;
+    --accent:#4F46E5;
+    --accent-soft:#EEF0FF;
+    --good:#0F9D6B;
+    --good-soft:#E7F8F1;
+    --radius-lg:16px;
+    --radius-md:10px;
+    --shadow:0 1px 2px rgba(16,24,40,.04), 0 8px 24px -8px rgba(16,24,40,.08);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  a{color:var(--accent);}
+  :focus-visible{ outline:2.5px solid var(--accent); outline-offset:2px; }
+  .num{ font-family:'JetBrains Mono', ui-monospace, Consolas, monospace; font-variant-numeric:tabular-nums; }
+
+  /* ---------- top bar ---------- */
+  .topbar{
+    background:var(--surface);
+    border-bottom:1px solid var(--border);
+  }
+  .topbar-inner{
+    max-width:1280px;
+    margin:0 auto;
+    padding:20px 32px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:16px;
+    flex-wrap:wrap;
+  }
+  .brand{ display:flex; align-items:baseline; gap:10px; }
+  .brand-mark{
+    width:30px; height:30px;
+    border-radius:8px;
+    background:linear-gradient(135deg, var(--accent), #7C74F0);
+    display:inline-flex; align-items:center; justify-content:center;
+    color:#fff; font-weight:800; font-size:14px;
+    flex-shrink:0;
+  }
+  .brand h1{ font-size:17px; font-weight:700; margin:0; letter-spacing:-.01em; }
+  .brand .tag{ font-size:12.5px; color:var(--text-soft); }
+  .verified-pill{
+    display:inline-flex; align-items:center; gap:6px;
+    background:var(--good-soft); color:var(--good);
+    font-size:12.5px; font-weight:600;
+    padding:6px 12px; border-radius:999px;
+  }
+  .verified-pill .dot{ width:6px; height:6px; border-radius:50%; background:var(--good); }
+
+  /* ---------- layout ---------- */
+  .page{ max-width:1280px; margin:0 auto; padding:36px 32px 64px; }
+  .intro{ max-width:640px; margin-bottom:28px; }
+  .intro h2{ font-size:26px; margin:0 0 8px; letter-spacing:-.02em; }
+  .intro p{ font-size:14.5px; color:var(--text-soft); line-height:1.6; margin:0; }
+
+  .layout{
+    display:flex;
+    flex-direction:column;
+    gap:20px;
+  }
+  .card{
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:var(--radius-lg);
+    box-shadow:var(--shadow);
+    padding:24px 26px;
+  }
+
+  /* ---------- input card ---------- */
+  .input-grid{
+    display:grid;
+    grid-template-columns:1.3fr 1fr;
+    gap:24px;
+    align-items:start;
+  }
+  .mode-toggle{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    background:var(--surface-2);
+    border:1px solid var(--border);
+    border-radius:var(--radius-md);
+    padding:4px;
+    margin-bottom:18px;
+    max-width:360px;
+  }
+  .mode-toggle button{
+    border:none; background:transparent;
+    font-family:inherit; font-size:13px; font-weight:600;
+    color:var(--text-soft);
+    padding:8px 10px; border-radius:7px;
+    cursor:pointer;
+  }
+  .mode-toggle button.active{
+    background:var(--surface); color:var(--accent);
+    box-shadow:0 1px 3px rgba(16,24,40,.10);
+  }
+
+  label{
+    display:block;
+    font-size:12.5px; font-weight:600;
+    color:var(--text-soft);
+    margin-bottom:6px;
+  }
+  .field{ margin-bottom:16px; }
+  textarea, input[type=number]{
+    width:100%;
+    font-family:inherit;
+    font-size:13.5px;
+    color:var(--text);
+    background:var(--surface-2);
+    border:1px solid var(--border);
+    border-radius:var(--radius-md);
+    padding:10px 12px;
+  }
+  textarea{ min-height:160px; line-height:1.55; resize:vertical; }
+  .field-row{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  .hint{ font-size:11.5px; color:var(--text-faint); margin-top:5px; line-height:1.5; }
+  .divider{ border:none; border-top:1px solid var(--border); margin:18px 0; }
+
+  /* ---------- stats ---------- */
+  .stat-row{ display:flex; gap:10px; flex-wrap:wrap; margin-bottom:20px; }
+  .stat-pill{
+    flex:1; min-width:110px;
+    background:var(--surface-2);
+    border:1px solid var(--border);
+    border-radius:var(--radius-md);
+    padding:12px 14px;
+  }
+  .stat-pill .k{ font-size:11.5px; color:var(--text-soft); font-weight:600; }
+  .stat-pill .v{ font-size:19px; font-weight:700; margin-top:2px; }
+
+  /* ---------- model comparison ---------- */
+  .section-label{
+    font-size:12.5px; font-weight:700; text-transform:uppercase; letter-spacing:.05em;
+    color:var(--text-soft); margin-bottom:12px;
+  }
+  
+  .model-row{
+    display:grid;
+    grid-template-columns:190px 1fr 100px;
+    align-items:center;
+    gap:14px;
+    padding:12px 14px;
+    margin:0 -14px;
+    border-radius:var(--radius-md);
+    transition:transform .2s ease, box-shadow .2s ease, background .2s ease;
+    cursor:default;
+  }
+  
+  .model-row:hover{
+    transform:translateY(-2px);
+    box-shadow:0 6px 16px rgba(16,24,40,.06);
+    background:var(--surface);
+  }
+
+  .model-row .name{ font-size:13.5px; font-weight:600; }
+  .model-row .name small{ display:block; font-weight:500; color:var(--text-faint); font-size:11px; margin-top:1px; }
+  
+  .bar-track{
+    background:var(--surface-2);
+    border-radius:999px;
+    height:10px;
+    position:relative;
+  }
+  
+  .bar-fill{
+    height:100%;
+    border-radius:999px;
+    display:flex;
+    overflow:hidden;
+    transition:width .25s ease;
+  }
+  
+  .bar-in{ height:100%; background:var(--accent); }
+  .bar-out{ height:100%; background:#928BF9; }
+  
+  .model-row.best .bar-in{ background:var(--good); }
+  .model-row.best .bar-out{ background:#34D399; }
+
+  .model-row .price{ text-align:right; font-size:13.5px; font-weight:700; }
+  .model-row .price small{ display:block; font-weight:500; color:var(--text-faint); font-size:10.5px; }
+  
+  .best-badge{
+    display:inline-block;
+    background:var(--good-soft); color:var(--good);
+    font-size:10px; font-weight:700; letter-spacing:.03em; text-transform:uppercase;
+    padding:2px 7px; border-radius:5px;
+    margin-left:6px;
+    transform:translateY(-1px);
+  }
+
+  .breakdown-tooltip{
+    position:absolute;
+    bottom:calc(100% + 8px);
+    left:50%;
+    transform:translateX(-50%) translateY(4px);
+    background:var(--text);
+    color:var(--surface);
+    padding:6px 10px;
+    border-radius:6px;
+    font-size:11px;
+    font-weight:600;
+    white-space:nowrap;
+    pointer-events:none;
+    opacity:0;
+    visibility:hidden;
+    box-shadow:0 4px 6px rgba(0,0,0,0.1);
+    transition:opacity .2s ease .6s, transform .2s ease .6s, visibility .2s .6s;
+    z-index:10;
+  }
+  
+  .breakdown-tooltip::after{
+    content:'';
+    position:absolute;
+    top:100%;
+    left:50%;
+    transform:translateX(-50%);
+    border-width:4px;
+    border-style:solid;
+    border-color:var(--text) transparent transparent transparent;
+  }
+
+  .model-row:hover .breakdown-tooltip{
+    opacity:1;
+    visibility:visible;
+    transform:translateX(-50%) translateY(0);
+  }
+
+  .custom-row{
+    margin-top:16px;
+    background:var(--surface-2);
+    border:1px dashed var(--border);
+    border-radius:var(--radius-md);
+    padding:14px;
+  }
+  .custom-row .field-row{ margin-bottom:0; }
+  .custom-row .field{ margin-bottom:0; }
+
+  .total-banner{
+    margin-bottom:20px;
+    background:var(--accent-soft);
+    border-radius:var(--radius-md);
+    padding:18px 20px;
+    display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px;
+  }
+  .total-banner .k{ font-size:12.5px; font-weight:600; color:var(--accent); }
+  .total-banner .model{ font-size:13px; color:var(--text-soft); margin-top:2px; }
+  .total-banner .v{ font-size:26px; font-weight:800; color:var(--accent); }
+
+  footer{
+    max-width:1280px; margin:0 auto; padding:0 32px 48px;
+    font-size:11.5px; color:var(--text-faint); line-height:1.7;
+  }
+  footer a{ color:var(--text-soft); text-decoration:underline; }
+
+  /* ---------- responsive ---------- */
+  @media (max-width: 860px){
+    .topbar-inner{ padding:16px 18px; }
+    .page{ padding:24px 18px 48px; }
+    .card{ padding:18px; }
+    .input-grid{ grid-template-columns:1fr; gap:0; }
+    .field-row{ grid-template-columns:1fr; }
+    .model-row{ grid-template-columns:1fr; row-gap:6px; }
+    .model-row .price{ text-align:left; }
+    .intro h2{ font-size:22px; }
+    .total-banner{ flex-direction:column; align-items:flex-start; }
+  }
+
+  @media (prefers-reduced-motion: no-preference){
+    .bar-fill{ transition:width .25s ease; }
+  }
+</style>
+</head>
+<body>
+
+  <div class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <span class="brand-mark">$</span>
+        <div>
+          <h1>API Cost Calculator</h1>
+          <div class="tag">Token &amp; pricing estimator for LLM APIs</div>
+        </div>
+      </div>
+      <span class="verified-pill"><span class="dot"></span> Prices verified Jul 8, 2026</span>
+    </div>
+  </div>
+
+  <div class="page">
+    <div class="intro">
+      <h2>What will your LLM API actually cost?</h2>
+      <p>Enter your prompt, or just tell us the word count, and see estimated token usage and monthly cost across every major model, cheapest first.</p>
+    </div>
+
+    <div class="layout">
+
+      <div class="card">
+        <div class="input-grid">
+          <div>
+            <div class="mode-toggle" role="tablist">
+              <button type="button" id="tabPaste" class="active" role="tab" aria-selected="true">Paste text</button>
+              <button type="button" id="tabManual" role="tab" aria-selected="false">Enter word count</button>
+            </div>
+
+            <div id="pasteMode">
+              <div class="field">
+                <label for="promptInput">Your text (prompt)</label>
+                <textarea id="promptInput" placeholder="Paste or type the text you'd send as input…"></textarea>
+              </div>
+            </div>
+
+            <div id="manualMode" style="display:none;">
+              <div class="field">
+                <label for="wordCountInput">Word count</label>
+                <input type="number" id="wordCountInput" min="0" placeholder="e.g. 500">
+                <div class="hint">We'll estimate tokens as ~1.3x your word count.</div>
+              </div>
+              <div class="field">
+                <label for="exactTokenInput">Exact token count (optional, overrides estimate)</label>
+                <input type="number" id="exactTokenInput" min="0" placeholder="Leave blank to use the estimate">
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <div class="field">
+              <label for="outputTokens">Expected reply (tokens)</label>
+              <input type="number" id="outputTokens" value="300" min="0">
+            </div>
+            <div class="field">
+              <label for="requestsMonth">Requests / month</label>
+              <input type="number" id="requestsMonth" value="1000" min="0">
+            </div>
+            <div class="hint">Don't know your reply length? 300 tokens is about a short paragraph.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="total-banner">
+          <div>
+            <div class="k">Cheapest option</div>
+            <div class="model" id="cheapModel">-</div>
+          </div>
+          <div class="v num" id="grandTotal">$0.00</div>
+        </div>
+
+        <div class="stat-row">
+          <div class="stat-pill"><div class="k">Characters</div><div class="v num" id="charCount">0</div></div>
+          <div class="stat-pill"><div class="k">Words</div><div class="v num" id="wordCount">0</div></div>
+          <div class="stat-pill"><div class="k">Est. input tokens</div><div class="v num" id="tokenCount">0</div></div>
+        </div>
+
+        <div class="section-label">Cost by model, cheapest first</div>
+        <div id="modelRows" aria-live="polite"></div>
+
+        <div class="custom-row">
+          <label style="margin-bottom:10px;">Add a custom model ($ per 1M tokens)</label>
+          <div class="field-row">
+            <div class="field">
+              <label for="customIn">Input $</label>
+              <input type="number" id="customIn" min="0" step="0.01" placeholder="0.00">
+            </div>
+            <div class="field">
+              <label for="customOut">Output $</label>
+              <input type="number" id="customOut" min="0" step="0.01" placeholder="0.00">
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <footer>
+    Token counts are approximate (blended chars÷4 / words×1.3 heuristic), not an exact tokenizer. Real counts vary by model, typically within 10 to 20%.
+    Prices reflect official provider rate cards as of July 8, 2026 and change without notice, so verify at
+    <a href="https://claude.com/pricing" target="_blank" rel="noopener">claude.com/pricing</a>,
+    <a href="https://openai.com/api/pricing" target="_blank" rel="noopener">openai.com/api/pricing</a>, and each provider's own pricing page before budgeting.
+  </footer>
+
+<script>
+  let MODELS = []; 
+
+  const verifiedPillEl = document.querySelector('.verified-pill');
+
+  async function loadPricingData() {
+    try {
+      const response = await fetch('prices.json');
+      const data = await response.json();
+      
+      verifiedPillEl.innerHTML = `<span class="dot"></span> Prices verified ${data.lastUpdated}`;
+      MODELS = data.models;
+      render();
+    } catch (error) {
+      console.error("Error loading live pricing data:", error);
+    }
+  }
+
+  const tabPaste = document.getElementById('tabPaste');
+  const tabManual = document.getElementById('tabManual');
+  const pasteMode = document.getElementById('pasteMode');
+  const manualMode = document.getElementById('manualMode');
+
+  const promptInput = document.getElementById('promptInput');
+  const wordCountInput = document.getElementById('wordCountInput');
+  const exactTokenInput = document.getElementById('exactTokenInput');
+  const outputTokensEl = document.getElementById('outputTokens');
+  const requestsMonthEl = document.getElementById('requestsMonth');
+  const customInEl = document.getElementById('customIn');
+  const customOutEl = document.getElementById('customOut');
+
+  const charCountEl = document.getElementById('charCount');
+  const wordCountEl = document.getElementById('wordCount');
+  const tokenCountEl = document.getElementById('tokenCount');
+  const modelRowsEl = document.getElementById('modelRows');
+  const grandTotalEl = document.getElementById('grandTotal');
+  const cheapModelEl = document.getElementById('cheapModel');
+
+  let mode = 'paste';
+  tabPaste.addEventListener('click', () => setMode('paste'));
+  tabManual.addEventListener('click', () => setMode('manual'));
+  function setMode(m){
+    mode = m;
+    tabPaste.classList.toggle('active', m === 'paste');
+    tabManual.classList.toggle('active', m === 'manual');
+    tabPaste.setAttribute('aria-selected', m === 'paste');
+    tabManual.setAttribute('aria-selected', m === 'manual');
+    pasteMode.style.display = m === 'paste' ? 'block' : 'none';
+    manualMode.style.display = m === 'manual' ? 'block' : 'none';
+    render();
+  }
+
+  function estimateTokensFromText(text){
+    if(!text) return 0;
+    const chars = text.length;
+    const words = text.trim().split(/\s+/).filter(Boolean).length;
+    return Math.round(((chars/4) + (words*1.3)) / 2);
+  }
+
+  function formatMoney(n){
+    if (n === 0) return "$0.00";
+    if (n < 0.01) return "$" + n.toFixed(4);
+    return "$" + n.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2});
+  }
+
+  function render(){
+    let chars = 0, words = 0, inputTokens = 0;
+
+    if (mode === 'paste'){
+      const text = promptInput.value;
+      chars = text.length;
+      words = text.trim() ? text.trim().split(/\s+/).filter(Boolean).length : 0;
+      inputTokens = estimateTokensFromText(text);
+    } else {
+      words = Math.max(0, Number(wordCountInput.value) || 0);
+      chars = Math.round(words * 5.6);
+      const exact = Number(exactTokenInput.value);
+      inputTokens = exact > 0 ? Math.round(exact) : Math.round(words * 1.3);
+    }
+
+    const outputTokens = Math.max(0, Number(outputTokensEl.value) || 0);
+    const requests = Math.max(0, Number(requestsMonthEl.value) || 0);
+
+    charCountEl.textContent = chars.toLocaleString();
+    wordCountEl.textContent = words.toLocaleString();
+    tokenCountEl.textContent = inputTokens.toLocaleString();
+
+    let models = MODELS.map(m => ({...m}));
+    const cIn = Number(customInEl.value);
+    const cOut = Number(customOutEl.value);
+    if (cIn > 0 || cOut > 0){
+      models.push({ name: "Custom model", provider: "your rate", in: cIn || 0, out: cOut || 0 });
+    }
+
+    models.forEach(m => {
+      const inCostReq = (inputTokens / 1e6) * m.in;
+      const outCostReq = (outputTokens / 1e6) * m.out;
+      
+      m.perRequest = inCostReq + outCostReq;
+      m.monthly = m.perRequest * requests;
+      
+      m.inCostMo = inCostReq * requests;
+      m.outCostMo = outCostReq * requests;
+    });
+    
+    models.sort((a,b) => a.monthly - b.monthly);
+    const maxMonthly = Math.max(...models.map(m => m.monthly), 0.000001);
+
+    modelRowsEl.innerHTML = models.map((m, i) => {
+      const totalPct = Math.max(3, (m.monthly / maxMonthly) * 100);
+      
+      const inPct = m.monthly > 0 ? (m.inCostMo / m.monthly) * 100 : 0;
+      const outPct = m.monthly > 0 ? (m.outCostMo / m.monthly) * 100 : 0;
+
+      return `
+        <div class="model-row ${i===0 ? 'best' : ''}">
+          <div class="name">${m.name}${i===0 ? '<span class="best-badge">Best value</span>' : ''}<small>${m.provider} · $${m.in}/$${m.out} per M</small></div>
+          
+          <div class="bar-track">
+            <div class="bar-fill" style="width:${totalPct}%">
+              <div class="bar-in" style="width:${inPct}%"></div>
+              <div class="bar-out" style="width:${outPct}%"></div>
+            </div>
+            <div class="breakdown-tooltip">
+              In: ${formatMoney(m.inCostMo)} <span style="opacity:0.5; margin:0 4px;">|</span> Out: ${formatMoney(m.outCostMo)}
+            </div>
+          </div>
+          
+          <div class="price num">${formatMoney(m.monthly)}<small>${formatMoney(m.perRequest)}/req</small></div>
+        </div>
+      `;
+    }).join('');
+
+    if (models.length){
+      grandTotalEl.textContent = formatMoney(models[0].monthly) + " / mo";
+      cheapModelEl.textContent = models[0].name;
+    }
+  }
+
+  [promptInput, wordCountInput, exactTokenInput, outputTokensEl, requestsMonthEl, customInEl, customOutEl].forEach(el => {
+    el.addEventListener('input', render);
+  });
+
+  loadPricingData();
+</script>
+</body>
+</html>
