@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>What Is a Token in AI Pricing? (And Why It Decides Your Bill)</title>
+<meta name="description" content="A plain-English explanation of what tokens actually are, why they're not the same as words, and how they determine what you pay for GPT, Claude, and other LLM APIs.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#F3F5F9;
+    --surface:#FFFFFF;
+    --surface-2:#F8F9FC;
+    --border:#E4E7EE;
+    --text:#12141C;
+    --text-soft:#6B7280;
+    --text-faint:#9CA3AF;
+    --accent:#4F46E5;
+    --accent-soft:#EEF0FF;
+    --good:#0F9D6B;
+    --good-soft:#E7F8F1;
+    --coffee:#9A5B13;
+    --coffee-soft:#FDF3E7;
+    --radius-lg:16px;
+    --radius-md:10px;
+    --shadow:0 1px 2px rgba(16,24,40,.04), 0 8px 24px -8px rgba(16,24,40,.08);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  a{ color:var(--accent); }
+  :focus-visible{ outline:2.5px solid var(--accent); outline-offset:2px; }
+  code, .num{ font-family:'JetBrains Mono', ui-monospace, Consolas, monospace; }
+  code{
+    background:var(--surface-2);
+    border:1px solid var(--border);
+    border-radius:5px;
+    padding:1px 6px;
+    font-size:0.92em;
+  }
+
+  .topbar{ background:var(--surface); border-bottom:1px solid var(--border); }
+  .topbar-inner{
+    max-width:760px; margin:0 auto; padding:20px 24px;
+    display:flex; align-items:center; gap:10px;
+  }
+  .brand{ display:flex; align-items:baseline; gap:10px; text-decoration:none; }
+  .brand-mark{
+    width:30px; height:30px; border-radius:8px;
+    background:linear-gradient(135deg, var(--accent), #7C74F0);
+    display:inline-flex; align-items:center; justify-content:center;
+    color:#fff; font-weight:800; font-size:14px; flex-shrink:0;
+  }
+  .brand h1{ font-size:17px; font-weight:700; margin:0; letter-spacing:-.01em; color:var(--text); }
+
+  .page{ max-width:760px; margin:0 auto; padding:40px 24px 72px; }
+
+  .eyebrow{
+    font-size:12.5px; font-weight:700; text-transform:uppercase; letter-spacing:.06em;
+    color:var(--accent); margin-bottom:10px;
+  }
+  h2.title{ font-size:32px; line-height:1.2; letter-spacing:-.02em; margin:0 0 14px; }
+  .dek{ font-size:16px; color:var(--text-soft); line-height:1.6; margin:0 0 32px; }
+
+  article h3{ font-size:20px; margin:36px 0 12px; letter-spacing:-.01em; }
+  article p{ font-size:15.5px; line-height:1.75; color:var(--text); margin:0 0 16px; }
+  article ul{ margin:0 0 16px; padding-left:22px; }
+  article li{ font-size:15.5px; line-height:1.75; margin-bottom:6px; }
+  article strong{ font-weight:700; }
+
+  .example-card{
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:var(--radius-md);
+    padding:16px 18px;
+    margin:20px 0;
+  }
+  .example-card .label{ font-size:11.5px; font-weight:700; text-transform:uppercase; letter-spacing:.05em; color:var(--text-soft); margin-bottom:8px; }
+  .example-card .row{ display:flex; justify-content:space-between; font-size:14px; padding:5px 0; border-bottom:1px dotted var(--border); }
+  .example-card .row:last-child{ border-bottom:none; }
+  .example-card .row .v{ font-weight:700; }
+
+  .cta-card{
+    background:var(--accent-soft);
+    border-radius:var(--radius-lg);
+    padding:24px;
+    text-align:center;
+    margin:36px 0 8px;
+  }
+  .cta-card p{ margin:0 0 14px; color:var(--text); font-size:15px; }
+  .cta-btn{
+    display:inline-block;
+    background:var(--accent); color:#fff;
+    font-weight:700; font-size:14px;
+    text-decoration:none;
+    padding:11px 22px;
+    border-radius:999px;
+  }
+
+  footer{
+    max-width:760px; margin:0 auto; padding:0 24px 48px;
+    font-size:11.5px; color:var(--text-faint); line-height:1.7;
+  }
+  footer a{ color:var(--text-soft); }
+
+  @media (max-width:600px){
+    h2.title{ font-size:26px; }
+    .page{ padding:28px 18px 56px; }
+  }
+</style>
+</head>
+<body>
+
+  <div class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="../index.html">
+        <span class="brand-mark">$</span>
+        <h1>API Cost Calculator</h1>
+      </a>
+      <a href="https://buymeacoffee.com/pocketwizard" target="_blank" rel="noopener"
+         style="display:inline-flex; align-items:center; gap:5px; font-size:12.5px; font-weight:600;
+                color:var(--coffee); background:var(--coffee-soft); text-decoration:none;
+                padding:6px 12px; border-radius:999px; margin-left:auto;">
+        ☕ Support this project
+      </a>
+    </div>
+  </div>
+
+  <div class="page">
+    <div class="eyebrow">Guide</div>
+    <h2 class="title">What Is a Token in AI Pricing?</h2>
+    <p class="dek">Every LLM API bills you by the token, not the word. Here's what a token actually is, why it never lines up neatly with word count, and why that difference is exactly what makes costs hard to predict.</p>
+
+    <article>
+      <h3>A token is a chunk of text, not a word</h3>
+      <p>When you send text to an LLM, the model doesn't read it as words or letters. It first breaks the text into <strong>tokens</strong>: small chunks that are usually somewhere between a single character and a full word. Common short words like "the" or "is" are often one token each. Longer or less common words frequently split into two or more pieces. The word "tokenization" itself, for example, commonly breaks into something like "token" and "ization" as two separate tokens.</p>
+      <p>This matters because every model prices its API by the token, not by the word or the character. So the actual size of your bill depends on how your specific text happens to break apart, not on how long it looks to you.</p>
+
+      <h3>Why word count is a rough guide, not a real answer</h3>
+      <p>A widely used rule of thumb is that English text averages around <strong>4 characters per token</strong>, or roughly <strong>1.3 tokens per word</strong>. That's a reasonable estimate for typical sentences, but several things push the real number higher:</p>
+      <ul>
+        <li><strong>Uncommon words and names</strong> tend to split into more pieces than everyday vocabulary</li>
+        <li><strong>Code, JSON, and structured data</strong> tokenize less efficiently than plain prose, symbols and indentation count too</li>
+        <li><strong>Non-English languages</strong> often use noticeably more tokens per word than English, since most tokenizers are trained predominantly on English text</li>
+        <li><strong>Numbers and punctuation-heavy text</strong> (prices, dates, IDs) fragment more than you'd expect</li>
+      </ul>
+      <p>This is also why two different models can report different token counts for the exact same input, each provider trains its own tokenizer, so the same sentence gets sliced differently depending on which model you're calling.</p>
+
+      <h3>Input tokens and output tokens aren't priced the same</h3>
+      <p>Almost every provider charges a different rate for what you send (input) versus what the model generates back (output), and output is typically priced several times higher than input. That means a short prompt that produces a long, detailed answer can cost meaningfully more than a long prompt that gets a short reply. When you're estimating a budget, the expected length of the response usually matters more than the length of your question.</p>
+
+      <div class="example-card">
+        <div class="label">Rough example</div>
+        <div class="row"><span>500-word prompt</span><span class="v num">~650 tokens in</span></div>
+        <div class="row"><span>300-token reply</span><span class="v num">300 tokens out</span></div>
+        <div class="row"><span>At $3 in / $15 out per million tokens</span><span class="v num">~$0.007 per request</span></div>
+        <div class="row"><span>At 1,000 requests a month</span><span class="v num">~$6.45 / month</span></div>
+      </div>
+
+      <h3>Why this is worth estimating before you build</h3>
+      <p>Per-request costs look tiny in isolation, fractions of a cent, easy to shrug off. But they scale linearly with usage, and usage has a habit of growing faster than expected once a feature ships. A cost that looks negligible at 100 requests a day can turn into a real budget line at 10,000. Estimating token usage and comparing model pricing before you commit to one is a cheap way to avoid an expensive surprise a few months in.</p>
+    </article>
+
+    <div class="cta-card">
+      <p>Want to see this applied to your own prompt, across every major model at once?</p>
+      <a class="cta-btn" href="../index.html">Try the cost calculator →</a>
+    </div>
+  </div>
+
+  <footer>
+    Part of the <a href="../index.html">API Cost Calculator</a> guide series. Token behavior described here is general and illustrative, exact tokenization varies by model and provider.
+    See also: <a href="index.html">all guides</a>, or <a href="claude-vs-gpt-pricing.html">Claude vs GPT: Pricing Compared</a>.
+    <br><br>
+    Built by a biomedical data scientist (and bioinformatics MSc student) learning web development as a hobby, with a dream of making tools that help scientists and developers build great things. If this saved you time, a <a href="https://buymeacoffee.com/pocketwizard" target="_blank" rel="noopener">coffee</a> is appreciated, never expected.
+  </footer>
+
+</body>
+</html>

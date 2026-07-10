@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude vs GPT: API Pricing Compared (July 2026)</title>
+<meta name="description" content="A full breakdown of Claude vs GPT API pricing per million tokens, plus every other major LLM provider, compared side by side.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#F3F5F9;
+    --surface:#FFFFFF;
+    --surface-2:#F8F9FC;
+    --border:#E4E7EE;
+    --text:#12141C;
+    --text-soft:#6B7280;
+    --text-faint:#9CA3AF;
+    --accent:#4F46E5;
+    --accent-soft:#EEF0FF;
+    --good:#0F9D6B;
+    --good-soft:#E7F8F1;
+    --coffee:#9A5B13;
+    --coffee-soft:#FDF3E7;
+    --radius-lg:16px;
+    --radius-md:10px;
+    --shadow:0 1px 2px rgba(16,24,40,.04), 0 8px 24px -8px rgba(16,24,40,.08);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  a{ color:var(--accent); }
+  :focus-visible{ outline:2.5px solid var(--accent); outline-offset:2px; }
+  .num{ font-family:'JetBrains Mono', ui-monospace, Consolas, monospace; font-variant-numeric:tabular-nums; }
+
+  .topbar{ background:var(--surface); border-bottom:1px solid var(--border); }
+  .topbar-inner{
+    max-width:820px; margin:0 auto; padding:20px 24px;
+    display:flex; align-items:center; gap:10px; flex-wrap:wrap;
+  }
+  .brand{ display:flex; align-items:baseline; gap:10px; text-decoration:none; }
+  .brand-mark{
+    width:30px; height:30px; border-radius:8px;
+    background:linear-gradient(135deg, var(--accent), #7C74F0);
+    display:inline-flex; align-items:center; justify-content:center;
+    color:#fff; font-weight:800; font-size:14px; flex-shrink:0;
+  }
+  .brand h1{ font-size:17px; font-weight:700; margin:0; letter-spacing:-.01em; color:var(--text); }
+  .coffee-link{
+    display:inline-flex; align-items:center; gap:5px; font-size:12.5px; font-weight:600;
+    color:var(--coffee); background:var(--coffee-soft); text-decoration:none;
+    padding:6px 12px; border-radius:999px; margin-left:auto;
+  }
+
+  .page{ max-width:820px; margin:0 auto; padding:40px 24px 72px; }
+  .eyebrow{
+    font-size:12.5px; font-weight:700; text-transform:uppercase; letter-spacing:.06em;
+    color:var(--accent); margin-bottom:10px;
+  }
+  h2.title{ font-size:30px; line-height:1.2; letter-spacing:-.02em; margin:0 0 10px; }
+  .dek{ font-size:16px; color:var(--text-soft); line-height:1.6; margin:0 0 6px; }
+  .snapshot-date{ font-size:12.5px; color:var(--text-faint); margin-bottom:28px; }
+
+  article h3{ font-size:19px; margin:34px 0 12px; letter-spacing:-.01em; }
+  article p{ font-size:15.5px; line-height:1.75; color:var(--text); margin:0 0 16px; }
+  article strong{ font-weight:700; }
+
+  table{
+    width:100%;
+    border-collapse:collapse;
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:var(--radius-md);
+    overflow:hidden;
+    font-size:13.5px;
+    margin:14px 0 8px;
+  }
+  caption{ text-align:left; font-size:11.5px; color:var(--text-faint); padding-bottom:8px; }
+  th, td{ text-align:left; padding:10px 12px; border-bottom:1px solid var(--border); }
+  th{
+    background:var(--surface-2);
+    font-size:11px; text-transform:uppercase; letter-spacing:.05em; color:var(--text-soft);
+    font-weight:700;
+  }
+  td.num, th.num{ text-align:right; font-family:'JetBrains Mono', ui-monospace, monospace; }
+  tr:last-child td{ border-bottom:none; }
+  tr.head-to-head td{ background:var(--accent-soft); }
+  .provider-tag{ font-size:11px; color:var(--text-faint); display:block; margin-top:1px; }
+
+  .cta-card{
+    background:var(--accent-soft);
+    border-radius:var(--radius-lg);
+    padding:24px;
+    text-align:center;
+    margin:36px 0 8px;
+  }
+  .cta-card p{ margin:0 0 14px; color:var(--text); font-size:15px; }
+  .cta-btn{
+    display:inline-block;
+    background:var(--accent); color:#fff;
+    font-weight:700; font-size:14px;
+    text-decoration:none;
+    padding:11px 22px;
+    border-radius:999px;
+  }
+
+  footer{
+    max-width:820px; margin:0 auto; padding:0 24px 48px;
+    font-size:11.5px; color:var(--text-faint); line-height:1.7;
+  }
+  footer a{ color:var(--text-soft); }
+
+  @media (max-width:600px){
+    h2.title{ font-size:24px; }
+    .page{ padding:28px 18px 56px; }
+    table{ font-size:12px; }
+    th, td{ padding:8px 8px; }
+  }
+</style>
+</head>
+<body>
+
+  <div class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="../index.html">
+        <span class="brand-mark">$</span>
+        <h1>API Cost Calculator</h1>
+      </a>
+      <a href="https://buymeacoffee.com/pocketwizard" target="_blank" rel="noopener" class="coffee-link">☕ Support this project</a>
+    </div>
+  </div>
+
+  <div class="page">
+    <div class="eyebrow">Guide</div>
+    <h2 class="title">Claude vs GPT: API Pricing Compared</h2>
+    <p class="dek">Both companies ship a budget, mid-tier, and flagship model. Here's exactly what each one costs per million tokens, head to head, plus every other major provider for context.</p>
+    <p class="snapshot-date">Prices below are a snapshot as of July 8, 2026. For always-current numbers, use the <a href="../index.html">live calculator</a>.</p>
+
+    <article>
+      <h3>Claude vs GPT, tier by tier</h3>
+      <p>The two companies structure their lineups almost identically: a cheap, fast model for high-volume simple tasks, a balanced mid-tier model most production apps actually use, and a flagship reasoning model for the hardest problems. Comparing within the same tier is a more useful exercise than comparing flagships alone, since most real applications live in the budget or mid tier.</p>
+
+      <table>
+        <caption>Price per 1 million tokens, in USD</caption>
+        <thead>
+          <tr><th>Tier</th><th>Claude</th><th class="num">Input / Output</th><th>GPT</th><th class="num">Input / Output</th></tr>
+        </thead>
+        <tbody>
+          <tr class="head-to-head">
+            <td>Budget</td>
+            <td>Claude Haiku 4.5</td><td class="num">$1.00 / $5.00</td>
+            <td>GPT-4.1 mini</td><td class="num">$0.40 / $1.60</td>
+          </tr>
+          <tr class="head-to-head">
+            <td>Mid-tier</td>
+            <td>Claude Sonnet 5<span class="provider-tag">intro price thru Aug 31, 2026</span></td><td class="num">$2.00 / $10.00</td>
+            <td>GPT-5.4</td><td class="num">$2.50 / $15.00</td>
+          </tr>
+          <tr class="head-to-head">
+            <td>Flagship</td>
+            <td>Claude Opus 4.8</td><td class="num">$5.00 / $25.00</td>
+            <td>GPT-5.5</td><td class="num">$5.00 / $30.00</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <p>At the budget tier, GPT-4.1 mini is the cheaper of the two. At mid-tier, Claude Sonnet 5's introductory pricing currently undercuts GPT-5.4 on output cost. At flagship, the two are close on input price, GPT-5.5 runs higher on output. None of this settles which model is "better," capability varies by task, but for cost alone, the gap is usually smaller than people assume, the real cost driver tends to be which tier you pick, not which company you pick.</p>
+
+      <h3>Every major provider, side by side</h3>
+      <p>Beyond Claude and GPT, several providers are considerably cheaper for high-volume, simpler tasks. If your use case doesn't need frontier-level reasoning, it's often worth pricing it against these too.</p>
+
+      <table>
+        <caption>Full lineup, price per 1 million tokens (USD)</caption>
+        <thead>
+          <tr><th>Model</th><th>Provider</th><th class="num">Input</th><th class="num">Output</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Claude Haiku 4.5</td><td>Anthropic</td><td class="num">$1.00</td><td class="num">$5.00</td></tr>
+          <tr><td>Claude Sonnet 5</td><td>Anthropic</td><td class="num">$2.00</td><td class="num">$10.00</td></tr>
+          <tr><td>Claude Opus 4.8</td><td>Anthropic</td><td class="num">$5.00</td><td class="num">$25.00</td></tr>
+          <tr><td>Claude Fable 5</td><td>Anthropic</td><td class="num">$10.00</td><td class="num">$50.00</td></tr>
+          <tr><td>GPT-4.1 nano</td><td>OpenAI</td><td class="num">$0.10</td><td class="num">$0.40</td></tr>
+          <tr><td>GPT-4.1 mini</td><td>OpenAI</td><td class="num">$0.40</td><td class="num">$1.60</td></tr>
+          <tr><td>GPT-4o</td><td>OpenAI</td><td class="num">$2.50</td><td class="num">$10.00</td></tr>
+          <tr><td>GPT-5.4</td><td>OpenAI</td><td class="num">$2.50</td><td class="num">$15.00</td></tr>
+          <tr><td>GPT-5.5</td><td>OpenAI</td><td class="num">$5.00</td><td class="num">$30.00</td></tr>
+          <tr><td>Gemini 2.5 Flash-Lite</td><td>Google</td><td class="num">$0.10</td><td class="num">$0.40</td></tr>
+          <tr><td>Gemini 3.5 Flash</td><td>Google</td><td class="num">$1.50</td><td class="num">$9.00</td></tr>
+          <tr><td>Gemini 3.1 Pro</td><td>Google</td><td class="num">$2.00</td><td class="num">$12.00</td></tr>
+          <tr><td>Grok 4.20</td><td>xAI</td><td class="num">$1.25</td><td class="num">$2.50</td></tr>
+          <tr><td>Grok 4.3</td><td>xAI</td><td class="num">$1.25</td><td class="num">$2.50</td></tr>
+          <tr><td>DeepSeek V3.2</td><td>DeepSeek</td><td class="num">$0.28</td><td class="num">$0.42</td></tr>
+          <tr><td>Llama 3.3 70B</td><td>Meta, via Groq</td><td class="num">$0.59</td><td class="num">$0.79</td></tr>
+          <tr><td>Mistral Small</td><td>Mistral AI</td><td class="num">$0.20</td><td class="num">$0.60</td></tr>
+        </tbody>
+      </table>
+
+      <p>DeepSeek V3.2, Mistral Small, and Gemini 2.5 Flash-Lite are the cheapest general-purpose options here by a wide margin, useful to know if you're building something high-volume where per-request cost matters more than squeezing out the last bit of capability.</p>
+
+      <h3>The number that actually decides your bill</h3>
+      <p>A price-per-million-tokens table only tells half the story. Your actual monthly cost depends on how many tokens your specific prompts and responses use, and that varies a lot by use case. A model that's cheaper per token can still cost you more overall if it tends to write longer responses, or if your prompts are much larger than average.</p>
+    </article>
+
+    <div class="cta-card">
+      <p>Plug in your own prompt and get an exact monthly estimate across all 17 models above.</p>
+      <a class="cta-btn" href="../index.html">Try the cost calculator →</a>
+    </div>
+  </div>
+
+  <footer>
+    Prices reflect official provider rate cards as of July 8, 2026 and change without notice. This page is a snapshot, for live numbers use the <a href="../index.html">calculator</a>. See also: <a href="index.html">all guides</a>, or <a href="what-is-a-token.html">What Is a Token in AI Pricing?</a>
+    <br><br>
+    Built by a biomedical data scientist (and bioinformatics MSc student) learning web development as a hobby, with a dream of making tools that help scientists and developers build great things. If this saved you time, a <a href="https://buymeacoffee.com/pocketwizard" target="_blank" rel="noopener">coffee</a> is appreciated, never expected.
+  </footer>
+
+</body>
+</html>
