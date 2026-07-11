@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "July 09, 2026",
+  "lastUpdated": "July 11, 2026",
   "models": [
     {
       "name": "Claude Haiku 4.5",
@@ -16,8 +16,8 @@
     {
       "name": "Claude Opus 4.8",
       "provider": "Anthropic",
-      "in": 10.0,
-      "out": 50.0
+      "in": 5.0,
+      "out": 25.0
     },
     {
       "name": "Claude Fable 5",
@@ -46,14 +46,14 @@
     {
       "name": "GPT-5.4",
       "provider": "OpenAI",
-      "in": 8.0,
+      "in": 2.5,
       "out": 15.0
     },
     {
       "name": "GPT-5.5",
       "provider": "OpenAI",
-      "in": 30.0,
-      "out": 180.0
+      "in": 5.0,
+      "out": 30.0
     },
     {
       "name": "Gemini 2.5 Flash-Lite",
@@ -88,8 +88,8 @@
     {
       "name": "DeepSeek V3.2",
       "provider": "DeepSeek",
-      "in": 0.2288,
-      "out": 0.3432
+      "in": 0.2145,
+      "out": 0.3217
     },
     {
       "name": "Llama 3.3 70B",

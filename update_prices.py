@@ -63,14 +63,15 @@ def find_match(target, catalog):
             candidates.append(item)
 
     if not candidates:
-        return None
+        return None, []
     if len(candidates) == 1:
-        return candidates[0]
-    # Multiple hits: prefer the one whose id most tightly matches the first pattern.
-    for c in candidates:
-        if patterns[0] in c.get("id", "").lower():
-            return c
-    return candidates[0]
+        return candidates[0], candidates
+    # Multiple hits: the correct model is consistently the one with the
+    # shortest id. Variant/tier suffixes (-fast, -pro, -preview-customtools,
+    # dated snapshots like -2024-11-20) always make an id longer than the
+    # plain base model, so shortest-id reliably picks the standard version.
+    best = min(candidates, key=lambda c: len(c.get("id", "")))
+    return best, candidates
 
 
 def explore(keyword, catalog, limit=12):
@@ -92,12 +93,14 @@ def main():
 
     updated_models = []
     warnings = []
+    audit = []
 
     for target in TARGET_MODELS:
-        match = find_match(target, catalog)
+        match, candidates = find_match(target, catalog)
         fallback = existing.get(target["name"])
         in_cost = out_cost = None
         diagnostic = None
+        ambiguity = f" [AMBIGUOUS: {len(candidates)} candidates: {[c.get('id') for c in candidates]}]" if len(candidates) > 1 else ""
 
         if match:
             pricing = match.get("pricing", {})
@@ -108,9 +111,14 @@ def main():
                 in_cost = out_cost = None
             if not (in_cost and out_cost and in_cost > 0 and out_cost > 0):
                 diagnostic = f"matched id='{match.get('id')}' but pricing looked like: {pricing}"
+            audit.append(
+                f"{target['name']:<22} -> matched id='{match.get('id')}' name='{match.get('name')}' "
+                f"raw_pricing={pricing} => in=${in_cost} out=${out_cost}{ambiguity}"
+            )
         else:
             nearby = explore(target.get("explore", target["match"][0]), catalog)
             diagnostic = f"no candidate matched. Nearby catalog ids: {nearby}" if nearby else "no candidate matched, and nothing nearby either"
+            audit.append(f"{target['name']:<22} -> NO MATCH. {diagnostic}")
 
         if in_cost and out_cost and in_cost > 0 and out_cost > 0:
             updated_models.append({
@@ -126,6 +134,11 @@ def main():
             updated_models.append(fallback)
         else:
             warnings.append(f"{target['name']}: no match AND no fallback, dropped from site ({diagnostic})")
+
+    print("\n--- FULL MATCH AUDIT (every target, review for wrong-but-successful matches) ---")
+    for line in audit:
+        print(line)
+    print("--- END AUDIT ---\n")
 
     payload = {
         "lastUpdated": datetime.now(timezone.utc).strftime("%B %d, %Y"),
