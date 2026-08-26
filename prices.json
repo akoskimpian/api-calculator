@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "August 25, 2026",
+  "lastUpdated": "August 26, 2026",
   "models": [
     {
       "name": "Claude Haiku 4.5",
@@ -94,8 +94,8 @@
     {
       "name": "Llama 3.3 70B",
       "provider": "Meta, via Groq",
-      "in": 0.1,
-      "out": 0.32
+      "in": 0.71,
+      "out": 0.71
     },
     {
       "name": "Mistral Small",
